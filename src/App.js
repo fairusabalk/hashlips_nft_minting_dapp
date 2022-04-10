@@ -5,6 +5,7 @@ import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
 
+
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
 
@@ -12,7 +13,7 @@ export const StyledButton = styled.button`
   padding: 10px;
   border-radius: 50px;
   border: none;
-  background-color: var(--secondary);
+  background-color: #7741bd;
   padding: 10px;
   font-weight: bold;
   color: var(--secondary-text);
@@ -32,11 +33,11 @@ export const StyledRoundButton = styled.button`
   padding: 10px;
   border-radius: 100%;
   border: none;
-  background-color: var(--primary);
+  background-color: #7741bd;
   padding: 10px;
   font-weight: bold;
   font-size: 15px;
-  color: var(--primary-text);
+  color: var(--secondary-text);
   width: 30px;
   height: 30px;
   cursor: pointer;
@@ -68,7 +69,7 @@ export const ResponsiveWrapper = styled.div`
 export const StyledLogo = styled.img`
   width: 200px;
   @media (min-width: 767px) {
-    width: 300px;
+    width: 500px;
   }
   transition: width 0.5s;
   transition: height 0.5s;
@@ -76,7 +77,7 @@ export const StyledLogo = styled.img`
 
 export const StyledImg = styled.img`
   box-shadow: 0px 5px 11px 2px rgba(0, 0, 0, 0.7);
-  border: 4px dashed var(--secondary);
+  border: 4px solid #45d7a6;
   background-color: var(--accent);
   border-radius: 100%;
   width: 200px;
@@ -90,16 +91,17 @@ export const StyledImg = styled.img`
 `;
 
 export const StyledLink = styled.a`
-  color: var(--secondary);
+  color: #601fb3;
   text-decoration: none;
 `;
 
 function App() {
+  
   const dispatch = useDispatch();
   const blockchain = useSelector((state) => state.blockchain);
   const data = useSelector((state) => state.data);
   const [claimingNft, setClaimingNft] = useState(false);
-  const [feedback, setFeedback] = useState(`Click buy to mint your NFT.`);
+  const [feedback, setFeedback] = useState(`Click to mint your NFT`);
   const [mintAmount, setMintAmount] = useState(1);
   const [CONFIG, SET_CONFIG] = useState({
     CONTRACT_ADDRESS: "",
@@ -130,9 +132,11 @@ function App() {
     setFeedback(`Minting your ${CONFIG.NFT_NAME}...`);
     setClaimingNft(true);
     blockchain.smartContract.methods
-      .mint(mintAmount)
+      .mint(blockchain.account, mintAmount)
       .send({
-        gasLimit: String(totalGasLimit),
+        gasLimit: null,
+        maxPriorityFeePerGas: null, 
+        maxFeePerGas: null,
         to: CONFIG.CONTRACT_ADDRESS,
         from: blockchain.account,
         value: totalCostWei,
@@ -162,8 +166,8 @@ function App() {
 
   const incrementMintAmount = () => {
     let newMintAmount = mintAmount + 1;
-    if (newMintAmount > 10) {
-      newMintAmount = 10;
+    if (newMintAmount > 20) {
+      newMintAmount = 20;
     }
     setMintAmount(newMintAmount);
   };
@@ -198,15 +202,17 @@ function App() {
       <s.Container
         flex={1}
         ai={"center"}
-        style={{ padding: 24, backgroundColor: "var(--primary)" }}
+        style={{ padding: 12, backgroundColor: "var(--primary)" }}
         image={CONFIG.SHOW_BACKGROUND ? "/config/images/bg.png" : null}
       >
+
+
+
         <StyledLogo alt={"logo"} src={"/config/images/logo.png"} />
-        <s.SpacerSmall />
-        <ResponsiveWrapper flex={1} style={{ padding: 24 }} test>
-          <s.Container flex={1} jc={"center"} ai={"center"}>
-            <StyledImg alt={"example"} src={"/config/images/example.gif"} />
-          </s.Container>
+        
+        <ResponsiveWrapper flex={1} style={{ padding: 12 }} test>
+          
+          
           <s.SpacerLarge />
           <s.Container
             flex={2}
@@ -216,10 +222,26 @@ function App() {
               backgroundColor: "var(--accent)",
               padding: 24,
               borderRadius: 24,
-              border: "4px dashed var(--secondary)",
+              border: "4px solid var(--secondary)",
               boxShadow: "0px 5px 11px 2px rgba(0,0,0,0.7)",
             }}
           >
+            <StyledImg alt={"NTFG"} src={"/config/images/NTFG.png"} />
+            <s.SpacerLarge />
+            <s.TextTitle
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                Generative PFPs by&nbsp;
+                <StyledLink target={"_blank"} href={CONFIG.FAIRUSA_LINK}> 
+                 Fairusa
+              </StyledLink>
+                <br></br>
+                Presented by&nbsp;
+                <StyledLink target={"_blank"} href={CONFIG.NONTOXIC_LINK}> 
+                 Non-Toxic
+              </StyledLink>
+                </s.TextTitle>
+
             <s.TextTitle
               style={{
                 textAlign: "center",
@@ -228,6 +250,7 @@ function App() {
                 color: "var(--accent-text)",
               }}
             >
+              
               {data.totalSupply} / {CONFIG.MAX_SUPPLY}
             </s.TextTitle>
             <s.TextDescription
@@ -237,7 +260,7 @@ function App() {
               }}
             >
               <StyledLink target={"_blank"} href={CONFIG.SCAN_LINK}>
-                {truncate(CONFIG.CONTRACT_ADDRESS, 15)}
+                Scan this Contract
               </StyledLink>
             </s.TextDescription>
             <s.SpacerSmall />
@@ -260,19 +283,14 @@ function App() {
               </>
             ) : (
               <>
+              
                 <s.TextTitle
                   style={{ textAlign: "center", color: "var(--accent-text)" }}
                 >
-                  1 {CONFIG.SYMBOL} costs {CONFIG.DISPLAY_COST}{" "}
-                  {CONFIG.NETWORK.SYMBOL}.
+                  One {CONFIG.SYMBOL} = {CONFIG.DISPLAY_COST}{" "}
+                  {CONFIG.NETWORK.SYMBOL}
                 </s.TextTitle>
                 <s.SpacerXSmall />
-                <s.TextDescription
-                  style={{ textAlign: "center", color: "var(--accent-text)" }}
-                >
-                  Excluding gas fees.
-                </s.TextDescription>
-                <s.SpacerSmall />
                 {blockchain.account === "" ||
                 blockchain.smartContract === null ? (
                   <s.Container ai={"center"} jc={"center"}>
@@ -360,7 +378,7 @@ function App() {
                           getData();
                         }}
                       >
-                        {claimingNft ? "BUSY" : "BUY"}
+                        {claimingNft ? "BUSY" : "🍄 MINT 🍄"}
                       </StyledButton>
                     </s.Container>
                   </>
@@ -370,15 +388,8 @@ function App() {
             <s.SpacerMedium />
           </s.Container>
           <s.SpacerLarge />
-          <s.Container flex={1} jc={"center"} ai={"center"}>
-            <StyledImg
-              alt={"example"}
-              src={"/config/images/example.gif"}
-              style={{ transform: "scaleX(-1)" }}
-            />
-          </s.Container>
+
         </ResponsiveWrapper>
-        <s.SpacerMedium />
         <s.Container jc={"center"} ai={"center"} style={{ width: "70%" }}>
           <s.TextDescription
             style={{
@@ -386,20 +397,8 @@ function App() {
               color: "var(--primary-text)",
             }}
           >
-            Please make sure you are connected to the right network (
-            {CONFIG.NETWORK.NAME} Mainnet) and the correct address. Please note:
-            Once you make the purchase, you cannot undo this action.
-          </s.TextDescription>
-          <s.SpacerSmall />
-          <s.TextDescription
-            style={{
-              textAlign: "center",
-              color: "var(--primary-text)",
-            }}
-          >
-            We have set the gas limit to {CONFIG.GAS_LIMIT} for the contract to
-            successfully mint your NFT. We recommend that you don't lower the
-            gas limit.
+            
+            Fairusa Balk // Non-Toxic Web3ArtStudio
           </s.TextDescription>
         </s.Container>
       </s.Container>
